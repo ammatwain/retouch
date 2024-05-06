@@ -1,5 +1,5 @@
 #include <iostream>
-#include "cxxopts.hpp"
+//#include "cxxopts.hpp"
 #include "opzioni.h"
 
 using namespace std;
@@ -7,12 +7,14 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     Opzioni opzioni;
+    opzioni.addOpzione(ARG_SUBCOM,"init","Inizializza il container");
+    opzioni.addOpzione(ARG_DOUBLE,"--git-modified","-m","","carica il repository modificato da git");
     opzioni.passArguments(argc, argv);
     for(int i = 0 ; i < opzioni.privateToken.size() ; i++) {
-        std::cout << i << opzioni.privateToken[i] << std::endl;
+        std::cout << i << "\t" << opzioni.privateToken[i] << std::endl;
     }
 }
-
+/*
 int _main(int argc, char *argv[])
 {
     int MAIN_EXIT_CODE = 0;
@@ -48,3 +50,4 @@ int _main(int argc, char *argv[])
     cout << "Hello World!" << endl;
     return MAIN_EXIT_CODE;
 }
+*/
