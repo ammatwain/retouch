@@ -1,6 +1,7 @@
 CMakeFiles/retouch.dir/main.cpp.o: \
  /home/amedeo/Github/ammatwain/retouch/main.cpp \
  /usr/include/stdc-predef.h \
+ /home/amedeo/Github/ammatwain/retouch/src/options.hpp \
  /home/amedeo/Github/ammatwain/retouch/src/extern/cxxopts/cxxopts.hpp \
  /usr/include/c++/13/cstdlib \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -215,4 +216,6 @@ CMakeFiles/retouch.dir/main.cpp.o: \
  /usr/include/c++/13/bits/regex.h /usr/include/c++/13/bits/regex.tcc \
  /usr/include/c++/13/bits/regex_executor.h \
  /usr/include/c++/13/bits/regex_executor.tcc /usr/include/c++/13/optional \
- /usr/include/c++/13/iostream
+ /home/amedeo/Github/ammatwain/retouch/src/colorize.hpp \
+ /usr/include/c++/13/iostream \
+ /home/amedeo/Github/ammatwain/retouch/src/colorize.hpp

@@ -3,7 +3,9 @@
 
 CMakeFiles/retouch.dir/main.cpp.o
  /home/amedeo/Github/ammatwain/retouch/main.cpp
+ /home/amedeo/Github/ammatwain/retouch/src/colorize.hpp
  /home/amedeo/Github/ammatwain/retouch/src/extern/cxxopts/cxxopts.hpp
+ /home/amedeo/Github/ammatwain/retouch/src/options.hpp
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h

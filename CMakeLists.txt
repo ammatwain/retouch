@@ -30,7 +30,12 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(GLOB CXX_OPTS  "${CXXOPTS_SRC_DIR}/*.hpp")
+file(GLOB CXX_OPTS
+  "${CXXOPTS_SRC_DIR}/*.hpp"
+  "${SRC_DIR}/*.hpp"
+  "${SRC_DIR}/*.h"
+  "${SRC_DIR}/*.cpp"
+)
 
 include(
     GNUInstallDirs
