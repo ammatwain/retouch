@@ -1,0 +1,8 @@
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/headers.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/retouch.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/edit_cache.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/rebuild_cache.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/list_install_components.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/install.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/install/local.dir
+/home/amedeo/Github/ammatwain/retouch/CMakeFiles/install/strip.dir
