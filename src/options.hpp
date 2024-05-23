@@ -1,11 +1,12 @@
 #ifndef RETOUCH_OPTIONS_HPP
 #define RETOUCH_OPTIONS_HPP
 
-#include "extern/cxxopts/cxxopts.hpp"
-#include "colorize.hpp"
-
 #include <iostream>
 #include <memory>
+
+#include "extern/cxxopts/cxxopts.hpp"
+#include "colorize.hpp"
+#include "command_init.hpp"
 
 std::string basename(std::string const & path)
 {
@@ -23,56 +24,97 @@ std::string getCommand(int argc, const char* argv[]) {
 bool parseCommandDefault(int argc, const char* argv[])
 {
     std::cout << "default" << std::endl;
+    CommandCore commandCore;
+    std::cout << commandCore.currentDir() << std::endl;
+
     return true;
 }
 
 bool parseCommandInit(int argc, const char* argv[])
 {
-    std::string program = basename(argv[0]); 
-    argv++; argc--;
     if (argc>0) {
-        try
-        {
-            std::unique_ptr<cxxopts::Options> allocated(new cxxopts::Options(program+" "+argv[0], Esc::fgBlue +  program+" "+argv[0] +": Example command line options" + Esc::reset ));
-            cxxopts::Options& options = *allocated;
-            options.positional_help("[optional args]").show_positional_help();
-            options
-            .set_width(70)
-            .set_tab_expansion()
-            //.allow_unrecognised_options()
-            .add_options()
-                ("o,original","Original github repository", cxxopts::value<std::string>(),"<URL>")
-                ("m,modified","Modified github repository", cxxopts::value<std::string>(),"<URL>")
-                ("h,help","Print help")
-            ;
-            auto result = options.parse(argc, argv);
-
-            if (result.count("help"))
+        std::string program = basename(argv[0]);
+        argv++; argc--;
+        if (argc>0) {
+            std::string command = basename(argv[0]);
+            std::string program_command = Esc::bold +  program + " " + command + Esc::reset;
+            try
             {
-                std::cout << options.help({"", "Group"}) << std::endl;
-                return true;
-            }
+                std::unique_ptr<cxxopts::Options> allocated(new cxxopts::Options(program_command, program_command));
+                cxxopts::Options& options = *allocated;
+                options.positional_help("[optional args]").show_positional_help();
+                options
+                .set_width(70)
+                .set_tab_expansion()
+                //.allow_unrecognised_options()
+                .add_options()
+                    ("d,directory","(Local path retouch repository)", cxxopts::value<std::string>(),"<FOLDER>")
+                    ("o,original","(Original github repository)", cxxopts::value<std::string>(),"<URL>")
+                    ("m,modified","(Modified github repository)", cxxopts::value<std::string>(),"<URL>")
+                    ("h,help","(Print this help)")
+                ;
+                auto result = options.parse(argc, argv);
 
-            //std::cout << "Arguments remain = " << argc << std::endl;
-            //auto arguments = result.arguments();
-            //std::cout << "Saw " << arguments.size() << " arguments" << std::endl;
-
-            if (result.unmatched().size()) {
-                std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
-                for (const auto& option: result.unmatched())
+                if (result.count("help"))
                 {
-                  std::cout << "'" << option << "' ";
+                    std::cout << options.help({"", "Group"}) << std::endl;
+                    return true;
                 }
-                std::cout << Esc::reset << std::endl << std::endl;            
-                std::cout << options.help({"", "Group"}) << std::endl;
+
+                if (result.unmatched().size()) {
+                    std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
+                    for (const auto& option: result.unmatched())
+                    {
+                      std::cout << "'" << option << "' ";
+                    }
+                    std::cout << Esc::reset << std::endl << std::endl;
+                    std::cout << options.help({"", "Group"}) << std::endl;
+                    return false;
+                }
+
+                namespace fs = std::filesystem;
+                fs::path path;
+                if (result.count("directory"))
+                {
+                    path.assign(result["directory"].as<std::string>());
+                    if(!path.is_absolute()){
+                        path.assign(fs::current_path().string() +  fs::path::preferred_separator + result["directory"].as<std::string>());
+                    }
+                }
+                else
+                {
+                    path.assign(fs::current_path());
+                }
+                if (!fs::is_directory(path)) {
+                    std::cout << path.string() << " non esiste" << std::endl;
+                    if (fs::is_directory(path.parent_path())){
+                        fs::create_directory(path);
+                        if (fs::is_directory(path)) {
+                            std::cout << path.string() << " adesso esiste ed è una directory" << std::endl;
+                        } else {
+                            std::cout << path.string() << " NON E' STATO POSSIBILE CREARE IL PATH" << std::endl;
+                            return false;
+                        }
+                    } else {
+                        std::cout << path.string() << " NON E' POSSIBILE CREARE IL PATH SU UN PATH CHE NON ESITE" << std::endl;
+                        return false;
+                    }
+                }
+                fs::current_path(path);
+                if (path.string() != fs::current_path().string()) {
+                    std::cout << path.string() << " NON E' STATO POSSIBILE CAMBIARE IL PATH" << std::endl;
+                    return false;
+                } else {
+                    std::cout << path.string() << " IL PATH E STATO CAMBIATO" << std::endl;
+                }
+            }
+            catch (const cxxopts::exceptions::exception& e)
+            {
+                std::cout << "error parsing options: " << e.what() << std::endl;
                 return false;
             }
-                    
-        }
-        catch (const cxxopts::exceptions::exception& e)
-        {
-            std::cout << "error parsing options: " << e.what() << std::endl;
-            return false;
+            CommandInit commandInit("test");
+            std::cout << commandInit.currentDir() << std::endl;
         }
     }
     return true;

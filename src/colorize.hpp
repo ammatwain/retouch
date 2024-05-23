@@ -2,7 +2,6 @@
 #define RETOUCH_COLORIZE_HPP
 
 #include <iostream>
-#include <string>
 
 class Esc
 {
