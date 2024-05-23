@@ -7,10 +7,30 @@
 class CommandCore
 {
 public:
-    CommandCore(std::string aProjectPath = std::filesystem::current_path().string() )
+
+    CommandCore(CommandCore* aParent = nullptr)
+    {
+        this->privateParent = aParent;
+    }
+
+    CommandCore(std::string aProjectPath)
     {
         this->setProjectPaths(aProjectPath);
         this->debug();
+    }
+
+    CommandCore* parent()
+    {
+        return this->privateParent;
+    }
+
+    CommandCore* root()
+    {
+        if (this->parent()){
+            return this->parent()->root();
+        } else {
+            return this;
+        }
     }
 
     std::string currentDir() {
@@ -111,6 +131,8 @@ private:
     std::string privateOriginalPath;
     std::string privateRetouchConfig;
 
+private:
+    CommandCore* privateParent;
     inline static const std::filesystem::path path = std::filesystem::current_path();
 };
 
