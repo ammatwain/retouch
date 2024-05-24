@@ -22,42 +22,42 @@ git push -u origin main
 class CommandInit: public CommandCore
 {
 public:
-    CommandInit(std::string aModifiedUrl, std::string aProjectPath = std::filesystem::current_path().string())
-        : CommandCore(aProjectPath)
+    CommandInit(CommandCore* aCommandCore)
+        : CommandCore("init", aCommandCore)
     {
-        if(this->projectParentPathExists())
+        if(this->projectParentDirExists())
         {
             if (!this->projectExists())
             {
-                if(!this->projectPathExists())
+                if(!this->projectDirExists())
                 {
-                    std::filesystem::create_directory(this->projectPath());
+                    std::filesystem::create_directory(this->projectDir());
                 }
-                if(this->projectPathExists())
+                if(this->projectDirExists())
                 {
-                    if(!this->retouchPathExists())
+                    if(!this->retouchDirExists())
                     {
-                        std::filesystem::create_directory(this->retouchPath());
+                        std::filesystem::create_directory(this->retouchDir());
                     }
-                    if(this->retouchPathExists())
+                    if(this->retouchDirExists())
                     {
-                        if(!this->originalPathExists())
+                        if(!this->originalDirExists())
                         {
-                            std::filesystem::create_directory(this->originalPath());
+                            std::filesystem::create_directory(this->originalDir());
                         }
-                        if(this->originalPathExists())
+                        if(this->originalDirExists())
                         {
-                            if(!this->modifiedPathExists())
+                            if(!this->modifiedDirExists())
                             {
-                                std::filesystem::create_directory(this->modifiedPath());
+                                std::filesystem::create_directory(this->modifiedDir());
                             }
-                            if(this->modifiedPathExists())
+                            if(this->modifiedDirExists())
                             {
-                                if(!this->retouchConfigExists())
+                                if(!this->retouchConfigFileExists())
                                 {
 
                                 }
-                                if(this->retouchConfigExists())
+                                if(this->retouchConfigFileExists())
                                 {
 
                                 }
@@ -68,6 +68,12 @@ public:
                 }
             }
         }
+    }
+    void parse()
+    {
+        cxxopts::ParseResult result = this->parseOptions();
+        std::cout << "PARSING INIT" << std::endl;
+
     }
 
 };

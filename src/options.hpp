@@ -6,7 +6,31 @@
 
 #include "extern/cxxopts/cxxopts.hpp"
 #include "colorize.hpp"
+#include "command_core.hpp"
+#include "command_default.hpp"
 #include "command_init.hpp"
+
+class RetouchOptions
+{
+public:
+    RetouchOptions(int argc, const char* argv[])
+    {
+        this->privateCommandCore = new CommandCore(argc, argv);
+        this->privateCommandDefault = new CommandDefault(this->privateCommandCore);
+        this->privateCommandInit = new CommandInit(this->privateCommandCore);
+        this->privateCommandCore->parse();
+    }
+    ~RetouchOptions()
+    {
+        delete this->privateCommandInit;
+        delete this->privateCommandDefault;
+        delete this->privateCommandCore;
+    }
+private:
+    CommandCore*    privateCommandCore;
+    CommandDefault* privateCommandDefault;
+    CommandInit*    privateCommandInit;
+};
 
 std::string basename(std::string const & path)
 {
@@ -24,7 +48,7 @@ std::string getCommand(int argc, const char* argv[]) {
 bool parseCommandDefault(int argc, const char* argv[])
 {
     std::cout << "default" << std::endl;
-    CommandCore commandCore;
+    CommandCore commandCore(argc,argv);
     std::cout << commandCore.currentDir() << std::endl;
 
     return true;
@@ -113,8 +137,8 @@ bool parseCommandInit(int argc, const char* argv[])
                 std::cout << "error parsing options: " << e.what() << std::endl;
                 return false;
             }
-            CommandInit commandInit("test");
-            std::cout << commandInit.currentDir() << std::endl;
+            //CommandInit commandInit("test");
+            //std::cout << commandInit.currentDir() << std::endl;
         }
     }
     return true;

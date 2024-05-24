@@ -62,10 +62,12 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+    RetouchOptions retouchOptions(argc, argv);
+/*
     if (!parseCommand(argc, argv))
     {
         return 1;
     }
-
+*/
   return 0;
 }
