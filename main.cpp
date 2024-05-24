@@ -23,6 +23,7 @@ THE SOFTWARE.
 */
 #include "src/options.hpp"
 #include "src/colorize.hpp"
+#include "src/retouch_fs.hpp"
 
 int main(int argc, const char* argv[])
 {
@@ -61,7 +62,7 @@ int main(int argc, const char* argv[])
         }
         return 1;
     }
-
+    RetouchFs::absListDir();
     RetouchOptions retouchOptions(argc, argv);
 /*
     if (!parseCommand(argc, argv))

@@ -18,6 +18,10 @@ public:
         this->privateCommandCore = new CommandCore(argc, argv);
         this->privateCommandDefault = new CommandDefault(this->privateCommandCore);
         this->privateCommandInit = new CommandInit(this->privateCommandCore);
+        //std::cout << this->privateCommandCore->program() << " " << this->privateCommandCore->command()<<std::endl;
+        //std::cout << this->privateCommandDefault->program() << " " << this->privateCommandDefault->command()<<std::endl;
+        //std::cout << this->privateCommandInit->program() << " " << this->privateCommandInit->command()<<std::endl;
+
         this->privateCommandCore->parse();
     }
     ~RetouchOptions()
@@ -75,7 +79,6 @@ bool parseCommandInit(int argc, const char* argv[])
                     ("d,directory","(Local path retouch repository)", cxxopts::value<std::string>(),"<FOLDER>")
                     ("o,original","(Original github repository)", cxxopts::value<std::string>(),"<URL>")
                     ("m,modified","(Modified github repository)", cxxopts::value<std::string>(),"<URL>")
-                    ("h,help","(Print this help)")
                 ;
                 auto result = options.parse(argc, argv);
 

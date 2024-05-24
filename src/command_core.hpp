@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include "extern/cxxopts/cxxopts.hpp"
+#include "colorize.hpp"
 
 class CommandCore
 {
@@ -14,30 +15,21 @@ public:
     {
         this->privateArgc = argc;
         this->privateArgv = argv;
-        this->privateOptions = new cxxopts::Options(this->program(), "");
-
-        //this->setProjectDirs(aProjectPath);
-        /*
-        std::string command = this->basename(argv[0]);
-        std::string program_command = Esc::bold +  program + " " + command + Esc::reset;
-        try
-        {
-            std::unique_ptr<cxxopts::Options> allocated(new cxxopts::Options(program_command, program_command));
-            cxxopts::Options& options = *allocated;
-            options.positional_help("[optional args]").show_positional_help();
-            options
-                .set_width(70)
-                .set_tab_expansion()
-
-        this->debug();
-        */
+        this->protectedArgc = this->privateArgc;
+        this->protectedArgv = this->privateArgv;
+        this->privateDefaultArgs[0] = this->privateArgv[0];
+        this->setOptions();
     }
 
     CommandCore(std::string aCommandName, CommandCore* aParent)
     {
         this->privateParent = aParent;
+        if (aCommandName==""){
+            aCommandName = this->defaultCommand();
+        }
+        this->privateName = aCommandName;
         this->root()->addChild(aCommandName, this);
-        this->privateOptions = new cxxopts::Options(this->program(), this->command());
+        this->setOptions();
     }
 
     ~CommandCore()
@@ -47,10 +39,10 @@ public:
 
     int argc()
     {
-        if (this->isRoot()) {
-            return this->privateArgc;
+        if (!this->isRoot()) {
+            return this->root()->argc() - 1;
         } else {
-            return this->privateArgc - 1;
+            return this->protectedArgc;
         }
     }
 
@@ -66,17 +58,23 @@ public:
     const char** argv()
     {
         if (!this->isRoot()) {
-            return this->privateArgv++;
+            return &this->root()->argv()[1];
         }
-        return this->privateArgv;
+        return this->protectedArgv;
     }
 
     std::string command()
     {
-        if (!isRoot()){
-            return this->argv(0);
+        //return this->privateName;
+        if (!this->isRoot()){
+            return this->privateName; //argv(0);
         }
         return "";
+    }
+
+    const char* defaultCommand()
+    {
+        return this->privateDefaultArgs[1];;
     }
 
     bool isRoot()
@@ -84,49 +82,50 @@ public:
         return this->parent() == nullptr;
     }
 
+    cxxopts::Options* options()
+    {
+        return this->privateOptions;
+    }
+
     CommandCore* parent()
     {
         return this->privateParent;
     }
 
-    void parse() {
-        std::string commandString = this->argv(1);
-        if (commandString=="") {
-            commandString = "default";
+    virtual int parse() {
+        std::string commandString = this->privateDefaultArgs[1];
+        CommandCore* command = nullptr;
+        if (this->privateArgc>1){
+            std::string  tmpCommandString = this->privateArgv[1];
+            auto it = this->privateChildMap.find(tmpCommandString);
+            if (it != this->privateChildMap.end()) {
+                // if key is found
+                command = it->second;
+                return command->parse();
+            }
+        }
+        this->protectedArgc++;
+        this->protectedArgv = new const char*[this->protectedArgc];
+        this->protectedArgv[0] = this->privateDefaultArgs[0];
+        this->protectedArgv[1] = this->privateDefaultArgs[1];
+
+        if (this->protectedArgc>2){
+            for(int i = 2; i< this->protectedArgc; i++) {
+                this->protectedArgv[i] = this->privateArgv[i-1];
+            }
         }
         auto it = this->privateChildMap.find(commandString);
-
         if (it != this->privateChildMap.end()) {
             // if key is found
-            //std::cout << "Map contains key '" << commandString  << "' with value: " << it->second << std::endl;
-            it->second->parse();
+            command = it->second;
+            return command->parse();
         }
-        else {
-            // if key is not found
-            std::cout << "Map does not contain key '" << commandString << "'" << std::endl;
-        }
-
-        //if (this->privateChildMap.)
-        //CommandCore* command = this->privateChildMap[""]
-        /*
-        if (command=="")
-        {
-            return parseCommandDefault(argc, argv);
-        }
-        else if (command=="init")
-        {
-            return parseCommandInit(argc, argv);
-        }
-        else
-        {
-            return parseCommandUnknown(argc, argv);
-        }
-        return true;
-        */
+        std::cout << "Map does not contain key '" << this->protectedArgv[1] << "'" << std::endl;
+        return 1;
     };
 
     cxxopts::ParseResult parseOptions(){
-        return this->privateOptions->parse(this->argc(), this->argv());
+        return this->options()->parse(this->argc(), this->argv());
     }
 
     std::string program()
@@ -137,11 +136,30 @@ public:
 
     CommandCore* root()
     {
-        if (this->parent()){
+        if (this->parent()!=nullptr){
             return this->parent()->root();
         } else {
             return this;
         }
+    }
+
+    void setOptions()
+    {
+        std::string cmdline = "";
+        if (this->command()!=this->defaultCommand()) {
+            cmdline = Esc::bold + this->program() + " " + this->command() + Esc::reset;
+        } else {
+            cmdline = Esc::bold + this->program() + Esc::reset;
+        }
+        this->privateOptions = new cxxopts::Options(cmdline , cmdline);
+        this->privateOptions->positional_help("[optional args]").show_positional_help();
+        this->privateOptions
+            ->set_width(70)
+            .set_tab_expansion()
+            .allow_unrecognised_options()
+            .add_options()
+            ("h,help","(Print this help)")
+            ;
     }
 
     std::string currentDir() {
@@ -168,7 +186,8 @@ public:
 protected:
     void addChild(std::string aCommandName, CommandCore* aChildCommand)
     {
-        this->privateChildMap[aCommandName] = aChildCommand;
+        //this->privateChildMap[aCommandName] = aChildCommand;
+        this->privateChildMap.insert({aCommandName,aChildCommand});
     }
 
     std::string modifiedDir()
@@ -243,10 +262,14 @@ protected:
             this->privateRetouchConfigFile = this->privateModifiedDir + fs::path::preferred_separator + ".retouch.json";
         }
     }
+protected:
+    int protectedArgc = 0;
+    const char** protectedArgv;
 
 private:
     int privateArgc;
     const char** privateArgv;
+    const char* privateDefaultArgs[2] = {"","default"};
     std::string privateName = "";
 private:
     std::string privateProjectDir;
@@ -257,7 +280,7 @@ private:
 
 private:
     std::map<std::string,CommandCore*> privateChildMap;
-    CommandCore* privateParent;
+    CommandCore* privateParent = nullptr;
     cxxopts::Options* privateOptions;
 };
 

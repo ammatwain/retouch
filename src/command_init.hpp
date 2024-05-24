@@ -25,6 +25,12 @@ public:
     CommandInit(CommandCore* aCommandCore)
         : CommandCore("init", aCommandCore)
     {
+        this->options()->add_options()
+            ("d,directory","(Local path retouch repository)", cxxopts::value<std::string>(),"<FOLDER>")
+            ("o,original","(Original github repository)", cxxopts::value<std::string>(),"<URL>")
+            ("m,modified","(Modified github repository)", cxxopts::value<std::string>(),"<URL>")
+        ;
+        /*
         if(this->projectParentDirExists())
         {
             if (!this->projectExists())
@@ -68,12 +74,28 @@ public:
                 }
             }
         }
+        */
     }
-    void parse()
+    int parse() override
     {
         cxxopts::ParseResult result = this->parseOptions();
-        std::cout << "PARSING INIT" << std::endl;
+        if (result.count("help"))
+        {
+            std::cout << this->options()->help({"", "Group"}) << std::endl;
+            return 0;
+        }
+        if (result.unmatched().size()) {
+            std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
+            for (const auto& option: result.unmatched())
+            {
+                std::cout << "'" << option << "' ";
+            }
+            std::cout << Esc::reset << std::endl << std::endl;
+            std::cout << this->options()->help({"", "Group"}) << std::endl;
+            return 1;
+        }
 
+        return 0;
     }
 
 };

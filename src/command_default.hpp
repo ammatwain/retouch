@@ -22,18 +22,32 @@ git push -u origin main
 class CommandDefault: public CommandCore
 {
 public:
-    CommandDefault(CommandCore* aCommandCore): CommandCore("default", aCommandCore)
+    CommandDefault(CommandCore* aCommandCore): CommandCore("", aCommandCore)
     {
 
     }
 
-    void parse()
+    int parse() override
     {
         cxxopts::ParseResult result = this->parseOptions();
-        std::cout << "PARSING DEFAULT" << std::endl;
+        if (result.count("help"))
+        {
+            std::cout << this->options()->help({"", "Group"}) << std::endl;
+            return 0;
+        }
+        if (result.unmatched().size()) {
+            std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
+            for (const auto& option: result.unmatched())
+            {
+                std::cout << "'" << option << "' ";
+            }
+            std::cout << Esc::reset << std::endl << std::endl;
+            std::cout << this->options()->help({"", "Group"}) << std::endl;
+            return 1;
+        }
 
+        return 0;
     }
-
 };
 
 #endif //RETOUCH_COMMAND_DEFAULT_HPP
