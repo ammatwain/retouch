@@ -33,6 +33,7 @@ int main(int argc, const char* argv[])
         "cp    ",
         "rm    ",
         "mv    ",
+        "ctags ",
         "mkdir ",
         "wget  ",
         "curl  ",
@@ -62,7 +63,8 @@ int main(int argc, const char* argv[])
         }
         return 1;
     }
-    RetouchFs::absListDir();
+    RetouchFs::listAllAbsolute();
+
     RetouchOptions retouchOptions(argc, argv);
 /*
     if (!parseCommand(argc, argv))

@@ -4,11 +4,19 @@
 #include <vector>
 #include <filesystem>
 #include <string>
+#include "retouch_matcher.hpp"
 
 using namespace std::literals;
 class RetouchFs
 {
 public:
+    enum flags{
+        FOLDERS=1,
+        FILES=2,
+        ALLENTRIES=3,
+        RELATIVE=4,
+        RECURSIVE=8,
+    };
     std::string getCurrentDir()
     {
         return std::filesystem::current_path().string();
@@ -43,18 +51,118 @@ public:
         return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
     }
 
-    static std::vector<std::string> absListDir(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listDirAbsolute(std::string pathString = std::filesystem::current_path().string())
     {
-        return listDir(false, false, true, true, pathString);
+        {
+            return RetouchFs::listDir(
+                pathString,
+                RetouchFs::FOLDERS
+            );
+        }
     }
 
-    static std::vector<std::string> relListDir(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listDirRelative(std::string pathString = std::filesystem::current_path().string())
     {
-        return listDir(true, true, true, true, pathString);
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RELATIVE| RetouchFs::FOLDERS
+        );
     }
 
-    static std::vector<std::string> listDir(bool relative, bool recursive, bool acceptFiles, bool acceptFolders, std::string pathString)
+    static std::vector<std::string> listDirAbsoluteRecursive(std::string pathString = std::filesystem::current_path().string())
     {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RECURSIVE | RetouchFs::FOLDERS
+        );
+    }
+
+    static std::vector<std::string> listDirRelativeRecursive(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::FOLDERS
+        );
+    }
+
+    static std::vector<std::string> listFileAbsolute(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::FILES
+        );
+    }
+
+    static std::vector<std::string> listFileRelative(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RELATIVE | RetouchFs::FILES
+        );
+    }
+
+    static std::vector<std::string> listFileAbsoluteRecursive(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RECURSIVE | RetouchFs::FILES
+        );
+    }
+
+    static std::vector<std::string> listFileRelativeRecursive(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::FILES
+        );
+    }
+
+    static std::vector<std::string> listAllAbsolute(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::ALLENTRIES
+        );
+    }
+
+    static std::vector<std::string> listAllRelative(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RELATIVE | RetouchFs::ALLENTRIES
+        );
+    }
+
+    static std::vector<std::string> listAllAbsoluteRecursive(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES
+        );
+    }
+
+    static std::vector<std::string> listAllRelativeRecursive(std::string pathString = std::filesystem::current_path().string())
+    {
+        return RetouchFs::listDir(
+            pathString,
+            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES
+        );
+    }
+
+    static std::vector<std::string> listDir(std::string pathString, unsigned int aFlags ){
+        bool relative = aFlags & RetouchFs::RECURSIVE;
+        bool recursive = aFlags & RetouchFs::RECURSIVE;
+        bool acceptFiles = aFlags & RetouchFs::FILES;
+        bool acceptFolders = aFlags & RetouchFs::FOLDERS;
+        Matcher matcher("*[!.cmake]");
+        matcher
+            .addPattern("*[!.cpp]")
+            .addPattern("*[!.yaml]")
+            .addPattern("*[!.out]");
+        if (!(acceptFiles&&acceptFolders)) {
+            acceptFiles = true;
+            acceptFolders = true;
+        }
         namespace fs = std::filesystem;
         std::vector<std::string> list;
         if (!RetouchFs::endsWith(pathString,fs::path::preferred_separator)){
@@ -68,7 +176,9 @@ public:
             for (auto const& dir_entry : fs::recursive_directory_iterator(path)) {
                 if (dir_entry.is_regular_file() && acceptFiles)
                 {
-                    list.push_back(fs::absolute(dir_entry).string());
+                    if (matcher.match(dir_entry.path().filename().string())) {
+                        list.push_back(fs::absolute(dir_entry).string());
+                    }
                 }
                 else if (dir_entry.is_directory() && acceptFolders) {
                     list.push_back(fs::absolute(dir_entry).string()+fs::path::preferred_separator);
@@ -78,7 +188,9 @@ public:
             for (auto const& dir_entry : fs::directory_iterator(path)) {
                 if (dir_entry.is_regular_file() && acceptFiles)
                 {
-                    list.push_back(fs::absolute(dir_entry).string());
+                    if (matcher.match(dir_entry.path().filename().string())) {
+                        list.push_back(fs::absolute(dir_entry).string());
+                    }
                 }
                 else if (dir_entry.is_directory() && acceptFolders) {
                     list.push_back(fs::absolute(dir_entry).string()+fs::path::preferred_separator);
