@@ -4,9 +4,13 @@
 #include <vector>
 #include <filesystem>
 #include <string>
+
 #include "retouch_matcher.hpp"
+#include "retouch_utils.hpp"
 
 using namespace std::literals;
+namespace fs = std::filesystem;
+
 class RetouchFs
 {
 public:
@@ -21,95 +25,73 @@ public:
     {
         return std::filesystem::current_path().string();
     }
-    inline static bool ends_with(std::string const & value, std::string const & ending)
-    {
-        if (ending.size() > value.size()) return false;
-        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-    }
 
-    inline static bool ends_with(std::string const & value, char const & cending)
-    {
-        std::string ending = ""; ending += cending;
-        if (ending.size() > value.size()) return false;
-        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-    }
-
-    static bool endsWith(std::string_view str, std::string_view suffix)
-    {
-        return str.size() >= suffix.size() && str.compare(str.size()-suffix.size(), suffix.size(), suffix) == 0;
-    }
-    static bool endsWith(std::string_view str, char csuffix)
-    {
-        std::string suffix = ""; suffix += csuffix;
-        return str.size() >= suffix.size() && str.compare(str.size()-suffix.size(), suffix.size(), suffix) == 0;
-    }
-
-    static bool startsWith(std::string_view str, char cprefix)
-    {
-
-        std::string prefix = ""; prefix += cprefix;
-        return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
-    }
-
-    static std::vector<std::string> listDirAbsolute(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listDirAbsolute(std::string pathString = "", std::vector<std::string> filter = {})
     {
         {
             return RetouchFs::listDir(
                 pathString,
-                RetouchFs::FOLDERS
+                RetouchFs::FOLDERS,
+                filter
             );
         }
     }
 
-    static std::vector<std::string> listDirRelative(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listDirRelative(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RELATIVE| RetouchFs::FOLDERS
+            RetouchFs::RELATIVE| RetouchFs::FOLDERS,
+            filter
         );
     }
 
-    static std::vector<std::string> listDirAbsoluteRecursive(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listDirAbsoluteRecursive(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RECURSIVE | RetouchFs::FOLDERS
+            RetouchFs::RECURSIVE | RetouchFs::FOLDERS,
+            filter
         );
     }
 
-    static std::vector<std::string> listDirRelativeRecursive(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listDirRelativeRecursive(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::FOLDERS
+            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::FOLDERS,
+            filter
         );
     }
 
-    static std::vector<std::string> listFileAbsolute(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listFileAbsolute(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::FILES
+            RetouchFs::FILES,
+            filter
         );
     }
 
-    static std::vector<std::string> listFileRelative(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listFileRelative(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RELATIVE | RetouchFs::FILES
+            RetouchFs::RELATIVE | RetouchFs::FILES,
+            filter
         );
     }
 
-    static std::vector<std::string> listFileAbsoluteRecursive(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listFileAbsoluteRecursive(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RECURSIVE | RetouchFs::FILES
+            RetouchFs::RECURSIVE | RetouchFs::FILES,
+            filter
         );
     }
 
-    static std::vector<std::string> listFileRelativeRecursive(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listFileRelativeRecursive(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
@@ -117,95 +99,109 @@ public:
         );
     }
 
-    static std::vector<std::string> listAllAbsolute(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listAllAbsolute(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::ALLENTRIES
+            RetouchFs::ALLENTRIES,
+            filter
         );
     }
 
-    static std::vector<std::string> listAllRelative(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listAllRelative(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RELATIVE | RetouchFs::ALLENTRIES
+            RetouchFs::RELATIVE | RetouchFs::ALLENTRIES,
+            filter
         );
     }
 
-    static std::vector<std::string> listAllAbsoluteRecursive(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listAllAbsoluteRecursive(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES
+            RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES,
+            filter
         );
     }
 
-    static std::vector<std::string> listAllRelativeRecursive(std::string pathString = std::filesystem::current_path().string())
+    static std::vector<std::string> listAllRelativeRecursive(std::string pathString = "", std::vector<std::string> filter = {})
     {
         return RetouchFs::listDir(
             pathString,
-            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES
+            RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES,
+            filter
         );
     }
 
-    static std::vector<std::string> listDir(std::string pathString, unsigned int aFlags ){
-        bool relative = aFlags & RetouchFs::RECURSIVE;
-        bool recursive = aFlags & RetouchFs::RECURSIVE;
-        bool acceptFiles = aFlags & RetouchFs::FILES;
-        bool acceptFolders = aFlags & RetouchFs::FOLDERS;
-        Matcher matcher("*[!.cmake]");
-        matcher
-            .addPattern("*[!.cpp]")
-            .addPattern("*[!.yaml]")
-            .addPattern("*[!.out]");
-        if (!(acceptFiles&&acceptFolders)) {
-            acceptFiles = true;
-            acceptFolders = true;
-        }
-        namespace fs = std::filesystem;
-        std::vector<std::string> list;
-        if (!RetouchFs::endsWith(pathString,fs::path::preferred_separator)){
-            pathString += fs::path::preferred_separator;
-        }
-
-        fs::path path(pathString);
-
-        // Iterate over the std::filesystem::directory_entry elements using `auto`
+    static std::vector<fs::directory_entry> ls(std::string pathString, bool recursive) {
+        std::vector<fs::directory_entry> vec;
         if (recursive) {
-            for (auto const& dir_entry : fs::recursive_directory_iterator(path)) {
-                if (dir_entry.is_regular_file() && acceptFiles)
-                {
-                    if (matcher.match(dir_entry.path().filename().string())) {
-                        list.push_back(fs::absolute(dir_entry).string());
-                    }
-                }
-                else if (dir_entry.is_directory() && acceptFolders) {
-                    list.push_back(fs::absolute(dir_entry).string()+fs::path::preferred_separator);
-                }
+            for (auto const& dir_entry : fs::recursive_directory_iterator(pathString)) {
+                vec.push_back(dir_entry);
             }
         } else {
-            for (auto const& dir_entry : fs::directory_iterator(path)) {
-                if (dir_entry.is_regular_file() && acceptFiles)
-                {
-                    if (matcher.match(dir_entry.path().filename().string())) {
-                        list.push_back(fs::absolute(dir_entry).string());
+            for (auto const& dir_entry : fs::directory_iterator(pathString)) {
+                vec.push_back(dir_entry);
+            }
+        }
+        return vec;
+    }
+
+    static std::vector<std::string> listDir(std::string pathString, unsigned int aFlags, std::vector<std::string> filter = {}){
+        Matcher* matcher = nullptr;
+        if (pathString=="" || pathString == "." || pathString == "./")  pathString = std::filesystem::current_path().string();
+        if (!((aFlags & RetouchFs::FILES) || (aFlags & RetouchFs::FOLDERS))) {
+            aFlags = aFlags | RetouchFs::FILES | RetouchFs::FOLDERS;
+        }
+        if (!Retouch::endsWith(pathString,fs::path::preferred_separator)){
+            pathString += fs::path::preferred_separator;
+        }
+        int pathStringLen = pathString.size();
+        if (filter.size()){
+            matcher = new Matcher();
+            for(int i = 0 ; i < filter.size() ; i++) {
+                matcher->addPattern(filter[i]);
+            }
+        }
+        /*
+        matcher->addPattern("^(?!\\.git).*$");
+        matcher->addPattern("^(?!\\.git\\/).*$");
+        matcher->addPattern("^(?!\\.retouch\\/).*$");
+        matcher->addPattern("^(?!build\\/).*$");
+        matcher->addPattern("^(?!builds\\/).*$");
+        matcher->addPattern("^(?!buildscripts\\/).*$");
+        matcher->addPattern("^(?!share\\/).*$");
+        matcher->addPattern("^(?!src\\/).*$");
+        matcher->addPattern("^(?!thirdparty\\/).*$");
+        matcher->addPattern("^(?!tools\\/).*$");
+        matcher->addPattern("^(?!test\\/).*$");
+        matcher->addPattern("^(?!vtest\\/).*$");
+        */
+        std::vector<std::string> list;
+
+        std::string absoluteEntryName = "";
+        std::string relativeEntryName = "";
+        std::vector<fs::directory_entry> ils = RetouchFs::ls(pathString, aFlags & RetouchFs::RECURSIVE);
+        for (int i = 0 ; i < ils.size() ; i++){
+            fs::directory_entry &dir_entry = ils[i];
+            std:: string absoluteEntryName = fs::absolute(dir_entry).string();
+            if (dir_entry. is_directory()) absoluteEntryName += fs::path::preferred_separator;
+            std:: string relativeEntryName = absoluteEntryName;
+            if (relativeEntryName.find(pathString)==0) relativeEntryName.replace(0, pathStringLen, "");
+            if ( (dir_entry.is_regular_file() && aFlags & RetouchFs::FILES) || (dir_entry.is_directory() && aFlags & RetouchFs::FOLDERS) )
+            {
+                bool ok = (matcher==nullptr) || matcher->match(relativeEntryName);
+                if (ok) {
+                    if (aFlags & RetouchFs::RELATIVE){
+                        list.push_back(relativeEntryName);
+                    } else {
+                        list.push_back(absoluteEntryName);
                     }
                 }
-                else if (dir_entry.is_directory() && acceptFolders) {
-                    list.push_back(fs::absolute(dir_entry).string()+fs::path::preferred_separator);
-                }
             }
         }
-        if (relative){
-            int strLen = pathString.size();
-            for(int i = 0 ; i < list.size(); i++){
-                if (list[i].find(pathString)==0) {
-                    list[i].replace(0,strLen,"");
-                }
-            }
-        }
-
         for(int i = 0 ; i < list.size(); i++){
             std::cout << list[i] << std::endl;
         }

@@ -63,7 +63,7 @@ int main(int argc, const char* argv[])
         }
         return 1;
     }
-    RetouchFs::listAllAbsolute();
+    RetouchFs::listAllRelativeRecursive("",{"^(?!.*\\.idx)$"});
 
     RetouchOptions retouchOptions(argc, argv);
 /*

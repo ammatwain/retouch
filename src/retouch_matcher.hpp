@@ -10,6 +10,9 @@
 #include <utility>
 #include <vector>
 #include <filesystem>
+#include <iostream>
+#include "retouch_utils.hpp"
+
 namespace fs = std::filesystem;
 
 class Matcher{
@@ -29,6 +32,7 @@ public:
 
     bool match(const std::string &name) {
         for(int i = 0 ; i < this->privMap.size() ; i++){
+            //std::cout <<"REGEX " << translate(this->privMap[i].first) << std::endl;
             if (!(std::regex_match(name, this->privMap[i].second))) {
                 return false;
             }
@@ -45,9 +49,13 @@ private:
         str.replace(start_pos, from.length(), to);
         return true;
     }
-
     static inline
         std::string translate(const std::string &pattern) {
+        return pattern;
+    }
+
+    static inline
+        std::string _translate(const std::string &pattern) {
         std::size_t i = 0, n = pattern.size();
         std::string result_string;
 
@@ -152,6 +160,7 @@ private:
 
     static inline
         std::regex compile_pattern(const std::string &pattern) {
+        //return std::regex(Matcher::translate(pattern), std::regex::extended);
         return std::regex(Matcher::translate(pattern), std::regex::ECMAScript);
     }
 
