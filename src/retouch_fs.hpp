@@ -26,72 +26,72 @@ public:
         return std::filesystem::current_path().string();
     }
 
-    static std::vector<std::string> listDirAbsolute(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listDirAbsolute(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         {
             return RetouchFs::listDir(
                 pathString,
                 RetouchFs::FOLDERS,
-                filter
+                ignored
             );
         }
     }
 
-    static std::vector<std::string> listDirRelative(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listDirRelative(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RELATIVE| RetouchFs::FOLDERS,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listDirAbsoluteRecursive(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listDirAbsoluteRecursive(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RECURSIVE | RetouchFs::FOLDERS,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listDirRelativeRecursive(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listDirRelativeRecursive(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::FOLDERS,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listFileAbsolute(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listFileAbsolute(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::FILES,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listFileRelative(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listFileRelative(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RELATIVE | RetouchFs::FILES,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listFileAbsoluteRecursive(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listFileAbsoluteRecursive(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RECURSIVE | RetouchFs::FILES,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listFileRelativeRecursive(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listFileRelativeRecursive(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
@@ -99,39 +99,39 @@ public:
         );
     }
 
-    static std::vector<std::string> listAllAbsolute(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listAllAbsolute(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::ALLENTRIES,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listAllRelative(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listAllRelative(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RELATIVE | RetouchFs::ALLENTRIES,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listAllAbsoluteRecursive(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listAllAbsoluteRecursive(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES,
-            filter
+            ignored
         );
     }
 
-    static std::vector<std::string> listAllRelativeRecursive(std::string pathString = "", std::vector<std::string> filter = {})
+    static std::vector<std::string> listAllRelativeRecursive(std::string pathString = "", std::vector<std::string> ignored = {})
     {
         return RetouchFs::listDir(
             pathString,
             RetouchFs::RELATIVE | RetouchFs::RECURSIVE | RetouchFs::ALLENTRIES,
-            filter
+            ignored
         );
     }
 
@@ -149,7 +149,7 @@ public:
         return vec;
     }
 
-    static std::vector<std::string> listDir(std::string pathString, unsigned int aFlags, std::vector<std::string> filter = {}){
+    static std::vector<std::string> listDir(std::string pathString, unsigned int aFlags, std::vector<std::string> ignored = {}){
         Matcher* matcher = nullptr;
         if (pathString=="" || pathString == "." || pathString == "./")  pathString = std::filesystem::current_path().string();
         if (!((aFlags & RetouchFs::FILES) || (aFlags & RetouchFs::FOLDERS))) {
@@ -159,10 +159,10 @@ public:
             pathString += fs::path::preferred_separator;
         }
         int pathStringLen = pathString.size();
-        if (filter.size()){
+        if (ignored.size()){
             matcher = new Matcher();
-            for(int i = 0 ; i < filter.size() ; i++) {
-                matcher->addPattern(filter[i]);
+            for(int i = 0 ; i < ignored.size() ; i++) {
+                matcher->addPattern(ignored[i]);
             }
         }
         /*
@@ -192,7 +192,7 @@ public:
             if (relativeEntryName.find(pathString)==0) relativeEntryName.replace(0, pathStringLen, "");
             if ( (dir_entry.is_regular_file() && aFlags & RetouchFs::FILES) || (dir_entry.is_directory() && aFlags & RetouchFs::FOLDERS) )
             {
-                bool ok = (matcher==nullptr) || matcher->match(relativeEntryName);
+                bool ok = (matcher==nullptr) || !matcher->match(relativeEntryName);
                 if (ok) {
                     if (aFlags & RetouchFs::RELATIVE){
                         list.push_back(relativeEntryName);

@@ -33,11 +33,11 @@ public:
     bool match(const std::string &name) {
         for(int i = 0 ; i < this->privMap.size() ; i++){
             //std::cout <<"REGEX " << translate(this->privMap[i].first) << std::endl;
-            if (!(std::regex_match(name, this->privMap[i].second))) {
-                return false;
+            if ((std::regex_match(name, this->privMap[i].second))) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
 private:

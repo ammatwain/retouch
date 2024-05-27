@@ -63,7 +63,12 @@ int main(int argc, const char* argv[])
         }
         return 1;
     }
-    RetouchFs::listAllRelativeRecursive("",{"^(?!.*\\.idx)$"});
+    RetouchFs::listAllRelativeRecursive("",
+        {
+            ".*\\.txt$",
+            ".*\\.idx$",
+        }
+    );
 
     RetouchOptions retouchOptions(argc, argv);
 /*
