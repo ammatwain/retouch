@@ -1,27 +1,24 @@
-#ifndef __PP_JSON_H__
-#define __PP_JSON_H__
+#ifndef RETOUCH_JSON_HPP
+#define RETOUCH_JSON_HPP
 
 #include <string>
-#include <fstream>
-#include <iostream>
-#include <sstream>
+#include "retouch_textfile.hpp"
 #include "extern/jsonxx/jsonxx.h"
 
 // INTERFACE
+namespace Retouch
+{
 
-class TextFileInterface {
-public:
-    std::string getFileContents(std::string fileName);
-    bool putFileContents(std::string fileName, std::string str);
-};
+namespace Json
+{
 
-class RetouchJsonArray: public jsonxx::Array, TextFileInterface {
+class Array: public jsonxx::Array, Retouch::TextFile {
 public:
     bool load(const std::string &filename);
     bool save(const std::string &filename);
 };
 
-class RetouchJsonObject: public jsonxx::Object, TextFileInterface {
+class Object: public jsonxx::Object, Retouch::TextFile {
 public:
     bool load(const std::string &filename);
     bool save(const std::string &filename);
@@ -29,45 +26,25 @@ public:
 
 // IMPLEMENTATION
 
-std::string TextFileInterface::getFileContents(std::string fileName) {
-    std::ifstream inputFile(fileName);
-    // check if the file was opened successfully
-    if (inputFile.is_open())
-    {
-        std::stringstream stringStream;
-        stringStream << inputFile.rdbuf(); //read the file
-        return stringStream.str(); //str holds the content of the file
-    }
-    return "";
+
+bool Array::load(const std::string &filename){
+    return this->parse(this->getContents(filename));
 }
 
-
-bool TextFileInterface::putFileContents(std::string fileName, std::string str)
-{
-    std::ofstream outputFile(fileName);
-    // check if the file was opened successfully
-    if (outputFile.is_open()) { // check if the file was opened successfully
-        outputFile << str; // write data to the file
-        outputFile.close(); // close the file when done
-        return true;
-    }
-    return false;
+bool Array::save(const std::string &filename){
+    return this->putContents(filename, this->json());
 }
 
-bool RetouchJsonArray::load(const std::string &filename){
-    return this->parse(this->getFileContents(filename));
+bool Object::load(const std::string &filename){
+    return this->parse(this->getContents(filename));
 }
 
-bool RetouchJsonArray::save(const std::string &filename){
-    return this->putFileContents(filename, this->json());
+bool Object::save(const std::string &filename){
+    return this->putContents(filename, this->json());
 }
 
-bool RetouchJsonObject::load(const std::string &filename){
-    return this->parse(this->getFileContents(filename));
-}
+} // namespace Retouch::Json
 
-bool RetouchJsonObject::save(const std::string &filename){
-    return this->putFileContents(filename, this->json());
-}
+} // namespace Retouch
 
-#endif
+#endif // RETOUCH_JSON_HPP
