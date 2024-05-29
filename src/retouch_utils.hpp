@@ -2,6 +2,12 @@
 #define RETOUCH_UTILS_HPP
 #include <string>
 #include <filesystem>
+#include <cstdio>
+//#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
 
 using namespace std::literals;
 
@@ -39,6 +45,27 @@ static bool endsWith(std::string_view str, char csuffix)
 {
     std::string suffix = &csuffix;
     return str.size() >= suffix.size() && str.compare(str.size()-suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::string execute(const std::string cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    //std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    std::unique_ptr<FILE, void(*)(FILE*)> pipe(
+        popen(cmd.c_str(), "r"),
+        [](FILE * f) -> void {
+            // wrapper to ignore the return value from pclose() is needed with newer versions of gnu g++
+            std::ignore = pclose(f);
+        }
+    );
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+
+    while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    return result;
 }
 
 static bool startsWith(std::string_view str, char cprefix)

@@ -10,9 +10,6 @@
 namespace Retouch
 {
 
-namespace Console
-{
-
 class TextFile {
 public:
     std::string getContents(std::string fileName);
@@ -45,8 +42,6 @@ bool TextFile::putContents(std::string fileName, std::string str)
     }
     return false;
 }
-
-} // namespace Retouch::Console
 
 } // namespace Retouch
 

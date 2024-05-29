@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include "extern/cxxopts/cxxopts.hpp"
+#include "retouch_utils.hpp"
 #include "retouch_console_escape.hpp"
 
 
@@ -100,6 +101,7 @@ public:
     }
 
     virtual int parse() {
+        int errorCode = 0;
         std::string commandString = this->privateDefaultArgs[1];
         Core* command = nullptr;
         if (this->privateArgc>1){
@@ -121,6 +123,22 @@ public:
                 this->protectedArgv[i] = this->privateArgv[i-1];
             }
         }
+
+        cxxopts::ParseResult result = this->parseOptions();
+        if (result.count("work-dir"))
+        {
+            std::cout << "work-dir " << result.count("work-dir") << std::endl;
+            errorCode = this->setProjectDirs(result["work-dir"].as<std::string>());
+        } else {
+            errorCode = this->setProjectDirs();
+        }
+
+        if (errorCode) {
+            return errorCode;
+        }
+
+        std::cout << "this->workDir()" << this->workDir() << std::endl;
+
         auto it = this->privateChildMap.find(commandString);
         if (it != this->privateChildMap.end()) {
             // if key is found
@@ -132,7 +150,23 @@ public:
     };
 
     cxxopts::ParseResult parseOptions(){
-        return this->options()->parse(this->argc(), this->argv());
+        cxxopts::ParseResult result = this->options()->parse(this->argc(), this->argv());
+        if (result.count("help"))
+        {
+            std::cout << this->options()->help({"", "Group"}) << std::endl;
+            return 0;
+        }
+        if (result.unmatched().size()) {
+            std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
+            for (const auto& option: result.unmatched())
+            {
+                std::cout << "'" << option << "' ";
+            }
+            std::cout << Esc::reset << std::endl << std::endl;
+            std::cout << this->options()->help({"", "Group"}) << std::endl;
+            return 1;
+        }
+
     }
 
     std::string program()
@@ -166,8 +200,8 @@ public:
             .allow_unrecognised_options()
             .add_options()
             ("h,help","(Print this help)")
-            ("W,work-dir","(Set the work dir, usually <work-dir>/<retouch-dir>)")
-            ("R,retouch-dir","(Set the .retouch dir, usually <work-dir>/<retouch-dir>)")
+            ("W,work-dir","(Set the work dir, usually <work-dir>/<retouch-dir>)",cxxopts::value<std::string>())
+            ("R,retouch-dir","(Set the .retouch dir, usually <work-dir>/<retouch-dir>)",cxxopts::value<std::string>())
             ;
     }
 
@@ -181,11 +215,11 @@ public:
 
     void debug()
     {
-        std::cout << "this->projectPath()  " << this->projectDir()   << " exists: " << this->projectDirExists()       << std::endl;
-        std::cout << "this->retouchPath()  " << this->retouchDir()   << " exists: " << this->retouchDirExists()       << std::endl;
-        std::cout << "this->originalPath() " << this->originalDir()  << " exists: " << this->originalDirExists()      << std::endl;
-        std::cout << "this->modifiedPath() " << this->modifiedDir()  << " exists: " << this->modifiedDirExists()      << std::endl;
-        std::cout << "this->retouchConfig()" << this->retouchConfigFile() << " exists: " << this->retouchConfigFileExists()     << std::endl;
+        std::cout << "this->WorkDir()           " << this->workDir()   << " exists: " << this->workDirExists()       << std::endl;
+        std::cout << "this->retouchDir()        " << this->retouchDir()   << " exists: " << this->retouchDirExists()       << std::endl;
+        std::cout << "this->originalDir()       " << this->originalDir()  << " exists: " << this->originalDirExists()      << std::endl;
+        std::cout << "this->modifiedDir()       " << this->modifiedDir()  << " exists: " << this->modifiedDirExists()      << std::endl;
+        std::cout << "this->retouchConfigFile() " << this->retouchConfigFile() << " exists: " << this->retouchConfigFileExists()     << std::endl;
     }
 
     std::string parentCurrentDir() {
@@ -221,22 +255,22 @@ protected:
 
     bool projectExists()
     {
-        return  projectDirExists() &&  retouchDirExists() && originalDirExists() && modifiedDirExists() && retouchConfigFileExists();
+        return  workDirExists() &&  retouchDirExists() && originalDirExists() && modifiedDirExists() && retouchConfigFileExists();
     }
 
-    std::string projectDir()
+    std::string workDir()
     {
-        return this->privateProjectDir;
+        return this->privateWorkDir;
     }
 
-    bool projectDirExists()
+    bool workDirExists()
     {
-        return std::filesystem::is_directory(this->privateProjectDir);
+        return std::filesystem::is_directory(this->privateWorkDir);
     }
 
-    bool projectParentDirExists()
+    bool parentWorkDirExists()
     {
-        return std::filesystem::is_directory(std::filesystem::path(this->privateProjectDir).parent_path());
+        return std::filesystem::is_directory(std::filesystem::path(this->privateWorkDir).parent_path());
     }
 
     std::string retouchConfigFile()
@@ -259,18 +293,38 @@ protected:
         return std::filesystem::is_directory(this->privateRetouchDir);
     }
 
-    void setProjectDirs(std::string aProjectDir)
+    int setProjectDirs(std::string aWorkDir = std::filesystem::current_path().string())
     {
+        int errorCode = 0;
         namespace fs = std::filesystem;
-        //this->privateProjectDir = path.string();
-        std::filesystem::path path(aProjectDir);
-        if (this->projectParentDirExists()){
-            this->privateRetouchDir = path.string() + fs::path::preferred_separator + ".retouch";
+        //
+        while(endsWith(aWorkDir, Retouch::DIRSEP)) {
+            aWorkDir.resize(aWorkDir.size()-1);
+        }
+        //
+        std::filesystem::path aWorkDirPath(aWorkDir);
+        //
+        this->privateWorkDir = std::filesystem::weakly_canonical(aWorkDirPath).string();
+        //
+        if (this->parentWorkDirExists()){
+            this->privateRetouchDir = this->privateWorkDir + fs::path::preferred_separator + ".retouch";
             this->privateOriginalDir = this->privateRetouchDir + fs::path::preferred_separator + "original";
             this->privateModifiedDir = this->privateRetouchDir + fs::path::preferred_separator + "modified";
             this->privateRetouchConfigFile = this->privateModifiedDir + fs::path::preferred_separator + ".retouch.json";
+        } else {
+            errorCode = 1 ;
+            std::cerr
+                << Esc::bgRed
+                << Esc::fgYellow
+                << Esc::bold
+                << " EXIT ERRORE!!! LA PARENT-DIRECTORY DELLA WORK-DIRECTORY DEVE ESSERE UN PERCORSO ESISTENTE! "
+                << Esc::reset << std::endl;
+            //throw std::runtime_error("ERRORE!!! ALMENO IL PARENT DI WORKDIR DEVE ESISTERE");
         }
+        //
+        return errorCode;
     }
+
 protected:
     int protectedArgc = 0;
     const char** protectedArgv;
@@ -281,7 +335,7 @@ private:
     const char* privateDefaultArgs[2] = {"","default"};
     std::string privateName = "";
 private:
-    std::string privateProjectDir;
+    std::string privateWorkDir;
     std::string privateRetouchDir;
     std::string privateModifiedDir;
     std::string privateOriginalDir;
