@@ -35,16 +35,27 @@ public:
             ("m,modified","(Modified github repository)", cxxopts::value<std::string>(),"<URL>")
         ;
         /*
-        if(this->projectParentDirExists())
-        {
+        */
+    }
+    int parse() override
+    {
+        int error = 0;
+        cxxopts::ParseResult result = this->parseOptions();
+        error = preParseCommon(result);
+        if (!error){
+            alert("1");
             if (!this->projectExists())
             {
-                if(!this->projectDirExists())
+                alert("2");
+                if(!this->workDirExists())
                 {
-                    std::filesystem::create_directory(this->projectDir());
+                    alert(this->workDir());
+                    std::filesystem::create_directory(this->workDir());
                 }
-                if(this->projectDirExists())
+                alert("3");
+                if(this->workDirExists())
                 {
+                    alert("3a");
                     if(!this->retouchDirExists())
                     {
                         std::filesystem::create_directory(this->retouchDir());
@@ -63,6 +74,7 @@ public:
                             }
                             if(this->modifiedDirExists())
                             {
+                                /*
                                 if(!this->retouchConfigFileExists())
                                 {
 
@@ -71,35 +83,16 @@ public:
                                 {
 
                                 }
-
+                                */
                             }
                         }
                     }
                 }
+            } else {
+                this->alert("Retoruch project already exists.");
             }
         }
-        */
-    }
-    int parse() override
-    {
-        cxxopts::ParseResult result = this->parseOptions();
-        if (result.count("help"))
-        {
-            std::cout << this->options()->help({"", "Group"}) << std::endl;
-            return 0;
-        }
-        if (result.unmatched().size()) {
-            std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
-            for (const auto& option: result.unmatched())
-            {
-                std::cout << "'" << option << "' ";
-            }
-            std::cout << Esc::reset << std::endl << std::endl;
-            std::cout << this->options()->help({"", "Group"}) << std::endl;
-            return 1;
-        }
-
-        return 0;
+        return error;
     }
 
 };

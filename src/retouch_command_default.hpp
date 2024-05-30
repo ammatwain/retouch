@@ -34,25 +34,13 @@ public:
 
     int parse() override
     {
+        int error = 0;
         cxxopts::ParseResult result = this->parseOptions();
-        if (result.count("help"))
-        {
-            std::cout << this->options()->help({"", "Group"}) << std::endl;
-            return 0;
-        }
-        if (result.unmatched().size()) {
-            std::cout << std::endl << Esc::bgRed << Esc::bright << Esc::fgYellow << " ERROR!!! " << result.unmatched().size() << " unmatched options: ";
-            for (const auto& option: result.unmatched())
-            {
-                std::cout << "'" << option << "' ";
-            }
-            std::cout << Esc::reset << std::endl << std::endl;
-            std::cout << this->options()->help({"", "Group"}) << std::endl;
-            return 1;
-        }
+        error = preParseCommon(result);
+        if (!error){
 
-
-        return 0;
+        }
+        return error;
     }
 };
 
