@@ -50,7 +50,8 @@
 				12,
 				13,
 				14,
-				15
+				15,
+				16
 			]
 		},
 		{
@@ -105,7 +106,7 @@
 		},
 		{
 			"backtrace" : 1,
-			"path" : "src/retouch_escape.hpp",
+			"path" : "src/retouch_console_escape.hpp",
 			"sourceGroupIndex" : 0
 		},
 		{
@@ -131,6 +132,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "src/retouch_opts.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "src/retouch_project.hpp",
 			"sourceGroupIndex" : 0
 		},
 		{
