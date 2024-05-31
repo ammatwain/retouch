@@ -1,11 +1,15 @@
 #include "src/retouch_console_escape.hpp"
 #include "src/retouch_console_cursor.hpp"
 
+#include "src/retouch_project.hpp"
 #include "src/retouch_options.hpp"
 #include "src/retouch_fs.hpp"
 
 int main(int argc, const char* argv[])
 {
+    Retouch::Project project("./tets");
+    return 0;
+
     std::vector<std::string> bootstrap_errors;
     std::vector<std::string> externals = {
         "ln    ",
