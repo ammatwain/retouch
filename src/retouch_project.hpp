@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include "retouch_utils.hpp"
 
 namespace fs = std::filesystem;
 
@@ -15,6 +16,20 @@ class Project
 public:
     Project(std::string aWorkDir="")
     {
+        while (Retouch::endsWith(aWorkDir,Retouch::DIRSEP)){
+            aWorkDir.pop_back();
+        }
+        if (aWorkDir.rfind(Retouch::DIRSEP ,0)==0) {
+            std::cout << "path absolute" << std::endl;
+        } else {
+            if (aWorkDir.rfind("." + Retouch::DIRSEP ,0)==0) {
+                aWorkDir.erase(0,2);
+            }
+            std::cout << Retouch::DIRSEP << std::endl;
+            aWorkDir = fs::current_path().generic_string() + Retouch::DIRSEP + aWorkDir;
+        }
+
+        std::cout << "aWorkDir "  << aWorkDir << std::endl;
         fs::path weaklyCanonicalWorkPath;
         fs::path parentPath;
         fs::path workPath;
@@ -24,13 +39,15 @@ public:
         } catch (const std::filesystem::filesystem_error &e) {
             std::cout << "ERRORE GENERICO SUL PATH DEL PROGETTO" << std::endl;
         }
-        std::cout << weaklyCanonicalWorkPath << std::endl;
+        std::cout << "weaklyCanonicalWorkPath " << weaklyCanonicalWorkPath << std::endl;
 
         try {
             parentPath = fs::canonical(weaklyCanonicalWorkPath.parent_path());
         } catch (const std::filesystem::filesystem_error &e) {
             std::cout << "ERRORE 2" << std::endl;
         }
+        std::cout << "parentPath " << parentPath << std::endl;
+        std::cout << "name " << weaklyCanonicalWorkPath.filename().string() << std::endl;
 
         try {
             workPath = fs::canonical(weaklyCanonicalWorkPath);

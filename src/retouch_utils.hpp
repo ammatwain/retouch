@@ -14,7 +14,12 @@ using namespace std::literals;
 namespace Retouch
 {
 
-const std::string DIRSEP = &std::filesystem::path::preferred_separator;
+#ifdef _GLIBCXX_FILESYSTEM_IS_WINDOWS
+    const std::string DIRSEP = "\\";
+#else
+    const std::string DIRSEP = "/";
+#endif
+
 
 /*
 inline static bool ends_with(std::string const & value, std::string const & ending)

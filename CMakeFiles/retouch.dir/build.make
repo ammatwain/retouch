@@ -73,15 +73,15 @@ CMakeFiles/retouch.dir/main.cpp.o: CMakeFiles/retouch.dir/flags.make
 CMakeFiles/retouch.dir/main.cpp.o: main.cpp
 CMakeFiles/retouch.dir/main.cpp.o: CMakeFiles/retouch.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/amedeo/Github/ammatwain/retouch/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/retouch.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/retouch.dir/main.cpp.o -MF CMakeFiles/retouch.dir/main.cpp.o.d -o CMakeFiles/retouch.dir/main.cpp.o -c /home/amedeo/Github/ammatwain/retouch/main.cpp
+	/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/retouch.dir/main.cpp.o -MF CMakeFiles/retouch.dir/main.cpp.o.d -o CMakeFiles/retouch.dir/main.cpp.o -c /home/amedeo/Github/ammatwain/retouch/main.cpp
 
 CMakeFiles/retouch.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/retouch.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/amedeo/Github/ammatwain/retouch/main.cpp > CMakeFiles/retouch.dir/main.cpp.i
+	/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/amedeo/Github/ammatwain/retouch/main.cpp > CMakeFiles/retouch.dir/main.cpp.i
 
 CMakeFiles/retouch.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/retouch.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/amedeo/Github/ammatwain/retouch/main.cpp -o CMakeFiles/retouch.dir/main.cpp.s
+	/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/amedeo/Github/ammatwain/retouch/main.cpp -o CMakeFiles/retouch.dir/main.cpp.s
 
 # Object files for target retouch
 retouch_OBJECTS = \

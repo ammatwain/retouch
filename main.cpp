@@ -7,7 +7,7 @@
 
 int main(int argc, const char* argv[])
 {
-    Retouch::Project project("./tets");
+    Retouch::Project project("../../te12313ts//");
     return 0;
 
     std::vector<std::string> bootstrap_errors;
