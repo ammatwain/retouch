@@ -19,6 +19,7 @@ public:
         while (Retouch::endsWith(aWorkDir,Retouch::DIRSEP)){
             aWorkDir.pop_back();
         }
+        /*
         if (aWorkDir.rfind(Retouch::DIRSEP ,0)==0) {
             std::cout << "path absolute" << std::endl;
         } else {
@@ -28,11 +29,12 @@ public:
             std::cout << Retouch::DIRSEP << std::endl;
             aWorkDir = fs::current_path().generic_string() + Retouch::DIRSEP + aWorkDir;
         }
-
+        */
         std::cout << "aWorkDir "  << aWorkDir << std::endl;
         fs::path weaklyCanonicalWorkPath;
         fs::path parentPath;
         fs::path workPath;
+        std::string projectName;
         //aWorkDir = fs::absolute(fs::current_path()).string();
         try {
             weaklyCanonicalWorkPath = fs::weakly_canonical(fs::absolute(aWorkDir));
@@ -47,12 +49,19 @@ public:
             std::cout << "ERRORE 2" << std::endl;
         }
         std::cout << "parentPath " << parentPath << std::endl;
-        std::cout << "name " << weaklyCanonicalWorkPath.filename().string() << std::endl;
+        projectName = weaklyCanonicalWorkPath.filename().string();
 
         try {
             workPath = fs::canonical(weaklyCanonicalWorkPath);
-        } catch (const std::filesystem::filesystem_error &e) {
-            std::cout << "ERRORE 3" << std::endl;
+        } catch (const std::filesystem::filesystem_error &e1) {
+            if (this->isValidProjectName(projectName)) {
+                std::filesystem::create_directory(weaklyCanonicalWorkPath);
+            }
+            try {
+                workPath = fs::canonical(weaklyCanonicalWorkPath);
+            } catch (const std::filesystem::filesystem_error &e2) {
+                std::cout << "ERRORE 3" << std::endl;
+            }
         }
         std::cout << workPath << std::endl;
 
@@ -87,6 +96,15 @@ public:
         }
     }
 private:
+    bool isValidProjectName(std::string aProjectName) {
+        for(int i = 0 ; i < aProjectName.size() ; i++) {
+            auto c = aProjectName[i];
+            if (this->privPosixPortableCharSet.find(aProjectName[i])== std::string::npos) {
+                return false;
+            }
+        }
+        return true;
+    }
     fs::path privWorkPath;
     const std::string privPosixPortableCharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
 };

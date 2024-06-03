@@ -155,7 +155,7 @@
 				}
 			],
 			"type" : "STRING",
-			"value" : "/usr/bin/g++-13"
+			"value" : "/usr/bin/g++"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER_AR",
@@ -303,7 +303,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/gcc-13"
+			"value" : "/usr/bin/gcc"
 		},
 		{
 			"name" : "CMAKE_C_OUTPUT_EXTENSION",
