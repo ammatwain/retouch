@@ -87,5 +87,6 @@ _deps
 *.cxxflags
 *.cflags
 
+.vscode
 
 # End of https://www.toptal.com/developers/gitignore/api/qtcreator,c++,cmake
