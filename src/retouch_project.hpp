@@ -16,6 +16,11 @@ class Project
 public:
     Project(std::string aWorkDir="", bool forceProjectNameCreation = false )
     {
+        this->setWorkDir(aWorkDir,forceProjectNameCreation);
+    }
+public:
+    int setWorkDir(std::string aWorkDir="", bool forceProjectNameCreation = false )
+    {
         /**
          * togliamo gli eventuali DIRSEP dalla fine del PATH
          */
@@ -27,12 +32,14 @@ public:
             this->privWeaklyCanonicalWorkPath = fs::weakly_canonical(fs::absolute(aWorkDir));
         } catch (const std::filesystem::filesystem_error &e) {
             std::cerr << "GENERAL ERROR WITH THE PROJECT PATH" << std::endl;
+            return 1;
         }
 
         try {
             this->privParentWorkPath = fs::canonical(this->privWeaklyCanonicalWorkPath.parent_path());
         } catch (const std::filesystem::filesystem_error &e) {
             std::cerr << "ERROR: You're trying to build a project in a path where the parent directory doesn't exist." << std::endl;
+            return 1;
         }
 
         this->privProjectName = this->privWeaklyCanonicalWorkPath.filename().string();
@@ -45,17 +52,20 @@ public:
                     std::filesystem::create_directory(this->privWeaklyCanonicalWorkPath);
                 } else {
                     std::cerr << "ERROR! The project name contains characters outside the allowed range [A-Za-z0-9._-]" << std::endl;
+                    return 1;
                 }
             }
             try {
                 this->privWorkPath = fs::canonical(this->privWeaklyCanonicalWorkPath);
             } catch (const std::filesystem::filesystem_error &e2) {
                 std::cerr << "WARNING! The path does not exist and the user did not request its creation." << std::endl;
+                return 1;
             }
         }
+        return 0;
         std::cout << this->privWorkPath << std::endl;
 
-/*
+        /*
         if (fs::is_directory(workPath.parent_path())) {
             std::cout << "LA CARTELLA PARENT ESISTE" << std::endl;
             // la cosa è fattibile, andiamo avanti
@@ -86,6 +96,7 @@ public:
         }
 */
     }
+
 private:
     bool isValidProjectName(std::string aProjectName) {
         for(int i = 0 ; i < aProjectName.size() ; i++) {
